@@ -44,4 +44,3 @@ routes.post('/', async (req, res) => {
 });
 
 export default routes;
-
