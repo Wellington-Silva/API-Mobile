@@ -14,7 +14,6 @@ routes.get('/:id', async (req, res) => {
             res.status(200).json(result);
             database.close();
         });
-        // .project({});
     } catch (e) {
         res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
     }
