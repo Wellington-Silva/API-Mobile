@@ -1,4 +1,4 @@
-import { Router, text } from 'express';
+import { Router } from 'express';
 import { ObjectId } from 'mongodb';
 import database from '../modules/db.mjs';
 
@@ -23,7 +23,6 @@ routes.get('/:id', async (req, res) => {
 // Criar uma pergunta
 routes.post('/', async (req, res) => {
     try {
-
         const content = {
             sender: ObjectId(),
             response: {
@@ -51,7 +50,7 @@ routes.post('/response/:id', async (req, res) => {
             createdAt: new Date(),
             updatedAt: new Date()
         }
-        database.db("QuestionBoxServer").collection("questions").updateOne({ _id: ObjectId(id) }, { $set: { response: data } })
+        database.db("QuestionBoxDB").collection("questions").updateOne({ _id: ObjectId(id) }, { $set: { response: data } })
             .then((result) => {
                 result.modifiedCount
                     ? res.status(200).json(result)
