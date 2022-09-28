@@ -4,6 +4,22 @@ import database from '../modules/db.mjs';
 
 const routes = Router();
 
+// Listar perguntas pelas tag
+routes.get('/questionbytag/:tagId', async (req, res) => {
+    try {
+        const { tagId } = req.params;
+        console.log(tagId);
+        database.db('QuestionBoxDB').collection('questions').find({ tags: ObjectId(tagId) })
+            .toArray((err, result) => {
+                if (err || !result) throw { error: true, message: "Nenhuma existe perguntas para essa TAG" };
+                res.status(200).json(result);
+                database.close();
+            });
+    } catch (e) {
+        res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
+    }
+});
+
 // Buscar uma pergunta específica
 routes.get('/:id', async (req, res) => {
     try {
@@ -21,13 +37,19 @@ routes.get('/:id', async (req, res) => {
 
 // Criar uma pergunta
 routes.post('/', async (req, res) => {
+    const { questionerId, userId, tagId, question } = req.body;
     try {
         const content = {
-            sender: ObjectId(),
+            questionerId: ObjectId(questionerId),
             response: {
-                text: '',
-                userId: ObjectId()
-            }
+                text: question.toString(),
+                userId: ObjectId(userId),
+                createdAt: new Date(),
+                updateAt: new Date()
+            },
+            tag: null,
+            createdAt: new Date(),
+            updateAt: new Date()
         };
         database.db("QuestionBoxDB").collection("questions").insertOne(content, (err, result) => {
             if (err) throw { error: true, message: "Não foi possível realizar a pergunta" };
