@@ -1,26 +1,26 @@
 import { ObjectId } from 'mongodb';
-import database from '../modules/db.mjs';
+// import database from '../modules/db.mjs';
 import vars from './vars.mjs';
 import jwt from 'jsonwebtoken';
 
 export default {
-    // Login
-    login: (req, res) => {
+    login: (user, pwd) => {
         try {
-            if (req.headers.user === jwt.email && req.body.pwd === jwt.pwd) {
+            if (user === jwt.email && pwd === jwt.pwd) {
                 const token = jwt.sign({ _id: ObjectId(_id) }, vars.secretJwt, { expiresIn: vars.expiresIn });
-                return res.status(200).json({ auth: true, token });
+                return { auth: true, token };
             } else {
-                res.status(401).json({ error: true, message: "E-mail ou senha inválido" });
+                return { error: true, message: "E-mail ou senha inválido" };
             }
         } catch (e) {
-            res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
+            return { error: true, message: e.message || "Houve um erro interno no servidor" };
         }
     },
 
     verify: (token) => {
-        jwt.verify(token, vars.secretJwt, (err, decoded) => {
-            if (err || !decoded) res.status(401).json({ error: true, message: "Token é inválido, tente novamente" });
+        token = token.split("Bearer ");
+        return jwt.verify(token[1], vars.secretJwt, (err, decoded) => {
+            if (err || !decoded) throw { error: true, message: "Token é inválido, tente novamente" };
             return decoded;
         });
     },

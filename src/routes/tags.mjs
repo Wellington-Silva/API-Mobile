@@ -12,7 +12,7 @@ routes.get('/list', async (req, res) => {
             if (err || !result) throw { error: true, message: "Nenhuma tag foi encontrada" };
             res.status(200).json(result);
             database.close();
-        })
+        });
     } catch (e) {
         res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
     }
@@ -23,17 +23,18 @@ routes.post('/', async (req, res) => {
     try {
         const token = req.headers.authentication;
         const { _id } = jwt.verify(token);
+        const { name, description } = req.body;
 
         const data = {
-            name: req.body.name,
+            name: name,
+            description: description.toString() || '',
             createrId: ObjectId(_id),
             createdAt: new Date(),
             updatedAT: new Date()
         };
-        console.log(data);
 
-        database.db("QuestionsBoxDB").collection("tags").insertOne(data, (err, result) => {
-            if (err || !result) throw { error: true, message: "Não foi possível inserir essa TAG" };
+        database.db("QuestionBoxDB").collection("tags").insertOne(data, (err, result) => {
+            if (err || !result) res.status(401).json({ error: true, message: "Não foi possível inserir essa TAG" });
             res.status(200).json(result);
             database.close();
         });

@@ -5,12 +5,22 @@ import jwt from '../modules/jwt.mjs';
 
 const routes = Router();
 
+// Login
+routes.get('/login', async (req, res) => {
+    try {
+        const { user, pwd } = req.params;
+        jwt.login(user, pwd);
+    } catch (e) {
+        res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
+    }
+})
+
 // Detalhes do usuário
 routes.get('/:id', async (req, res) => {
     try {
         const { id } = req.params;
         database.db('QuestionBoxDB').collection('users').findOne({ _id: ObjectId(id) }, (err, result) => {
-            if (err || !result) return res.status(501).json({ error: true, message: "Usuário não encontrado" });
+            if (err || !result) return res.status(404).json({ error: true, message: "Usuário não encontrado" });
             res.status(200).json(result);
             database.close();
         });
@@ -27,7 +37,7 @@ routes.get('/', async (req, res) => {
                 if (err || !result) return res.status(501).json({ error: true, message: "Usuário não encontrado" });
                 res.status(200).json(result);
                 database.close();
-            })
+            });
     } catch (e) {
         res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
     }
@@ -47,15 +57,15 @@ routes.post('/', async (req, res) => {
             if (err) throw { error: true, message: "Não foi possível realizar a pergunta" };
             const userJWT = {
                 _id: ObjectId(result.insertedId),
-                firstName: user.firstName,
-                surname: user.surname,
-                email: user.email,
-                cpf: user.cpf,
-                type: user.cpf,
+                firstName: req.body.firstName,
+                surname: req.body.surname,
+                email: req.body.email,
+                password: req.body.password,
+                cpf: req.body.cpf,
+                type: req.body.type,
                 accessLevel: parseInt(req.body.type) == 1 ? 1 : 2
             };
-            console.log(userJWT.accessLevel)
-            const token = jwt.create(userJWT); //criar jwt
+            const token = jwt.create(userJWT); // Criar JWT
             res.status(201).json({ user, jwt: token });
             database.close();
         });
@@ -65,7 +75,7 @@ routes.post('/', async (req, res) => {
 });
 
 // Editar usuário
-routes.delete('/:id', async (req, res) => {
+routes.put('/:id', async (req, res) => {
     try {
         const token = req.headers.authentication;
         const { _id } = jwt.validate(token);
