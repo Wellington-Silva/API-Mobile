@@ -2,18 +2,51 @@ import { Router } from 'express';
 import { ObjectId } from 'mongodb';
 import database from '../modules/db.mjs';
 import jwt from '../modules/jwt.mjs';
+import { createHmac, randomUUID } from "crypto";
 
 const routes = Router();
 
 // Login
-routes.get('/login', async (req, res) => {
+routes.get('/login/:email/:pwd', async (req, res) => {
     try {
-        const { user, pwd } = req.params;
-        jwt.login(user, pwd);
+        const { user, pwd } = req.params; // credentials
+
+        const conn = await database.connection();
+        conn.db("QuestionBoxDB").collection("users").findOne({ email }, (err, result) => {
+            if (err || !result) return res.status(400).json({ error: true, message: "Usuário não encontrado" });
+            const hasPassword = new Boolean(result?.password);
+            conn?.close();
+            if (!hasPassword) {
+                const tempPassword = result._id.slice(-8);
+                if (password === tempPassword) return res.status(200).json({ message: "Você precisa criar uma nova senha", nextStep: "create_first_password" });
+                return res.status(200).json({ error: true, message: "Verifique suas credenciais" });
+            }
+            else {
+                const hash = createHmac("sha256", vars.hash_secret).update(password?.toString()).digest("hex");
+                if (hash === result?.password) {
+                    const jwt = {
+                        _id: result._id,
+                        email: result.email,
+                        accessLevel: 2,
+                    }
+                    return res.status(200).json({
+                        session: {
+                            firstName: result?.firstName,
+                            surname: result?.surname,
+                            email: result.email,
+                            accessLevel: 2,
+                            token: jwt.create({ ...jwt }),
+                            ...jwt
+                        }
+                    });
+                }
+                res.status(200).json({ error: true, message: "Senha incorreta! Tente novamente" });
+            }
+        });
     } catch (e) {
         res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
     }
-})
+});
 
 // Detalhes do usuário
 routes.get('/:id', async (req, res) => {

@@ -29,6 +29,7 @@ routes.post('/', async (req, res) => {
             name: name,
             description: description.toString() || '',
             createrId: ObjectId(_id),
+            deleted: false,
             createdAt: new Date(),
             updatedAT: new Date()
         };
@@ -38,6 +39,25 @@ routes.post('/', async (req, res) => {
             res.status(200).json(result);
             database.close();
         });
+    } catch (e) {
+        res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
+    }
+});
+
+// Apagar TAG
+routes.delete('/delete/:id', async (req, res) => {
+    try {
+        const token = req.headers.authentication;
+        const { _id } = jwt.verify(token);
+        const { id } = req.params;
+
+        database.db("QuestionBoxDB").collection("tags").updateOne({ _id: ObjectId(id), createrId: ObjectId(_id) },
+            { $set: { deleted: true } })
+            .then((result) => {
+                result.modifiedCount
+                    ? result.status(200).json(result)
+                    : result.status(401).json({ error: true, message: "Não foi possível deletar essa TAG" })
+            });
     } catch (e) {
         res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
     }
