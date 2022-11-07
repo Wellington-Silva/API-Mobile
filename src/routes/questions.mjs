@@ -62,25 +62,25 @@ routes.post('/', async (req, res) => {
 });
 
 // Responder uma pergunta
-routes.post('/response/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const data = {
-            id: req.body.id,
-            text: req.body.text.toString(),
-            createdAt: new Date(),
-            updatedAt: new Date()
-        }
-        database.db("QuestionBoxDB").collection("questions").updateOne({ _id: ObjectId(id) }, { $set: { response: data } })
-            .then((result) => {
-                result.modifiedCount
-                    ? res.status(200).json(result)
-                    : res.status(503).json({ error: true, message: "Pergunta não encontrada" })
-                database.close();
-            });
-    } catch (e) {
-        res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
-    }
-});
+// routes.post('/response/:id', async (req, res) => {
+//     try {
+//         const { id } = req.params; // Identificador da Pergunta
+//         const data = {
+//             idQuestion: ObjectId(id),
+//             text: req.body.text.toString(),
+//             createdAt: new Date(),
+//             updatedAt: new Date()
+//         }
+//         database.db("QuestionBoxDB").collection("questions").updateOne({ _id: ObjectId(id) }, { $set: { response: data } })
+//             .then((result) => {
+//                 result.modifiedCount
+//                     ? res.status(200).json(result)
+//                     : res.status(503).json({ error: true, message: "Pergunta não encontrada" })
+//                 database.close();
+//             });
+//     } catch (e) {
+//         res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
+//     }
+// });
 
 export default routes;
