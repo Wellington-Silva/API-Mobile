@@ -4,14 +4,18 @@ import database from '../modules/db.mjs';
 
 const routes = Router();
 
-routes.get('/responses/:questionId', async (req, res) => {
-    const { questionId } = req.params;
+routes.get('/:questionId/:pagination', async (req, res) => {
+    const { questionId, pagination } = req.params;
+    const page = parseInt(pagination);
     try {
         database
             .db('QuestionBoxDB')
             .collection('response')
             .find({ questionId: ObjectId(questionId) })
             .limit(10)
+            .sort({ _id: 1 })
+            .limit(10)
+            .skip(page > 0 ? page * 10 : 0)
             .toArray((err, result) => {
                 if (err || !result) return res.status(404).json({ error: true, message: "Não respostas para essa pergunta" });
                 res.status(200).json(result);
@@ -52,3 +56,5 @@ routes.post('/response/:id', async (req, res) => {
         res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
     }
 });
+
+export default routes;
