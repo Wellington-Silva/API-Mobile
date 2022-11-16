@@ -20,15 +20,14 @@ routes.get('/list', async (req, res) => {
 
 // Cadastrar uma TAG
 routes.post('/', async (req, res) => {
+    const token = req.headers.authentication;
+    const { _id } = jwt.verify(token);
+    const { name, description } = req.body;
     try {
-        const token = req.headers.authentication;
-        const { _id } = jwt.verify(token);
-        const { name, description } = req.body;
-
         const data = {
-            name: name,
+            userId: ObjectId(_id),
+            name: name.toString(),
             description: description.toString() || '',
-            createrId: ObjectId(_id),
             deleted: false,
             createdAt: new Date(),
             updatedAT: new Date()

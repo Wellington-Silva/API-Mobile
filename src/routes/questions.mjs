@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { ObjectId } from 'mongodb';
 import database from '../modules/db.mjs';
+import jwt from '../modules/jwt.mjs';
 
 const routes = Router();
 
@@ -37,10 +38,12 @@ routes.get('/:id', async (req, res) => {
 
 // Criar uma pergunta
 routes.post('/', async (req, res) => {
-    const { userId, tagId, question } = req.body;
+    const authHeader = req.headers.authentication;
+    const { _id } = jwt.verify(authHeader);
+    const { tagId, question } = req.body;
     try {
         const content = {
-            userId: ObjectId(questionerId),
+            userId: ObjectId(_id),
             question: question.toString(),
             qtdLikes: 0,
             qtdNoLike: 0,
