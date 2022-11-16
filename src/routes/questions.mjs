@@ -37,17 +37,14 @@ routes.get('/:id', async (req, res) => {
 
 // Criar uma pergunta
 routes.post('/', async (req, res) => {
-    const { questionerId, userId, tagId, question } = req.body;
+    const { userId, tagId, question } = req.body;
     try {
         const content = {
-            questionerId: ObjectId(questionerId),
-            response: {
-                text: question.toString(),
-                userId: ObjectId(userId),
-                createdAt: new Date(),
-                updateAt: new Date()
-            },
-            tag: null,
+            userId: ObjectId(questionerId),
+            question: question.toString(),
+            qtdLikes: 0,
+            qtdNoLike: 0,
+            tag: tagId,
             createdAt: new Date(),
             updateAt: new Date()
         };

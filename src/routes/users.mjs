@@ -3,19 +3,18 @@ import { ObjectId } from 'mongodb';
 import database from '../modules/db.mjs';
 import jwt from '../modules/jwt.mjs';
 import { createHmac, randomUUID } from "crypto";
+import vars from '../modules/vars.mjs';
 
 const routes = Router();
 
 // Login
-routes.get('/login/:email/:pwd', async (req, res) => {
+routes.post('/login', async (req, res) => {
     try {
-        const { user, pwd } = req.params; // credentials
+        const { email, password } = req.body; // credentials
 
-        const conn = await database.connection();
-        conn.db("QuestionBoxDB").collection("users").findOne({ email }, (err, result) => {
+        database.db("QuestionBoxDB").collection("users").findOne({ email }, (err, result) => {
             if (err || !result) return res.status(400).json({ error: true, message: "Usuário não encontrado" });
             const hasPassword = new Boolean(result?.password);
-            conn?.close();
             if (!hasPassword) {
                 const tempPassword = result._id.slice(-8);
                 if (password === tempPassword) return res.status(200).json({ message: "Você precisa criar uma nova senha", nextStep: "create_first_password" });
@@ -24,19 +23,19 @@ routes.get('/login/:email/:pwd', async (req, res) => {
             else {
                 const hash = createHmac("sha256", vars.hash_secret).update(password?.toString()).digest("hex");
                 if (hash === result?.password) {
-                    const jwt = {
+                    const userJwt = {
                         _id: result._id,
                         email: result.email,
-                        accessLevel: 2,
+                        accessLevel: 1,
                     }
                     return res.status(200).json({
                         session: {
                             firstName: result?.firstName,
                             surname: result?.surname,
                             email: result.email,
-                            accessLevel: 2,
-                            token: jwt.create({ ...jwt }),
-                            ...jwt
+                            accessLevel: 1,
+                            token: jwt.create(userJwt),
+                            ...userJwt
                         }
                     });
                 }
@@ -78,9 +77,11 @@ routes.get('/', async (req, res) => {
 
 // Cadastrar usuário
 routes.post('/', async (req, res) => {
+    const hash = createHmac("sha256", vars.hash_secret).update(req.body.password?.toString()).digest("hex");
     try {
         const user = {
             ...req.body,
+            password: hash,
             disabled: false,
             createdAt: new Date(),
             updatedAt: new Date()
@@ -93,7 +94,6 @@ routes.post('/', async (req, res) => {
                 firstName: req.body.firstName,
                 surname: req.body.surname,
                 email: req.body.email,
-                password: req.body.password,
                 cpf: req.body.cpf,
                 type: req.body.type,
                 accessLevel: parseInt(req.body.type) == 1 ? 1 : 2
