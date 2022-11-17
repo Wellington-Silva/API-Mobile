@@ -27,7 +27,7 @@ routes.post('/login', async (req, res) => {
                         _id: result._id,
                         email: result.email,
                         accessLevel: 1,
-                    }
+                    };
                     return res.status(200).json({
                         session: {
                             firstName: result?.firstName,

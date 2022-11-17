@@ -33,7 +33,7 @@ routes.post('/', async (req, res) => {
             updatedAT: new Date()
         };
 
-        database.db("QuestionBoxDB").collection("tags").insertOne(data, (err, result) => {
+        database.db('QuestionBoxDB').collection('tags').insertOne(data, (err, result) => {
             if (err || !result) res.status(401).json({ error: true, message: "Não foi possível inserir essa TAG" });
             res.status(200).json(result);
             database.close();
@@ -50,7 +50,8 @@ routes.delete('/delete/:id', async (req, res) => {
         const { _id } = jwt.verify(token);
         const { id } = req.params;
 
-        database.db("QuestionBoxDB").collection("tags").updateOne({ _id: ObjectId(id), createrId: ObjectId(_id) },
+        database.db('QuestionBoxDB').collection('tags').updateOne(
+            { _id: ObjectId(id), createrId: ObjectId(_id) },
             { $set: { deleted: true } })
             .then((result) => {
                 result.modifiedCount
