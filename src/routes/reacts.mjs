@@ -18,7 +18,7 @@ routes.put('/like/:questionId', async (req, res) => {
         react: react,
         createdAt: new Date(),
         updatedAt: new Date()
-    }
+    };
 
     try {
         database.db('QuestionBoxDB').collection('reacts').insertOne(data, (err, result) => {
