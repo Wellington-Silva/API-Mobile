@@ -14,7 +14,8 @@ try {
     app.use(`/br/users`, users);
     app.use(`/br/tags`, tags);
 
-    app.listen(vars.port, () =>
+    app.listen(vars.port, () => 
         console.log("Server started", `Running server on ${vars.port}`)
     );
+
 } catch (e) { console.log(e); }
