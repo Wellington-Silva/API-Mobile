@@ -5,8 +5,8 @@ import database from '../modules/db.mjs';
 
 const routes = Router();
 
-// Listar Tags
-routes.get('/list', async (req, res) => {
+// Listar todas as Tags (SCROLL INFINITO - PAGINATION)
+routes.get('/', async (req, res) => {
     try {
         database.db("QuestionBoxDB").collection("tags").find().toArray((err, result) => {
             if (err || !result) throw { error: true, message: "Nenhuma tag foi encontrada" };
@@ -16,6 +16,13 @@ routes.get('/list', async (req, res) => {
     } catch (e) {
         res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
     }
+});
+
+//  Listar as tags populares (As 8 primeiras tags mais usadas)
+routes.get('/popular', async (req, res) => {
+
+    // CODE
+
 });
 
 // Cadastrar uma TAG
@@ -38,26 +45,6 @@ routes.post('/', async (req, res) => {
             res.status(200).json(result);
             database.close();
         });
-    } catch (e) {
-        res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
-    }
-});
-
-// Apagar TAG
-routes.delete('/delete/:id', async (req, res) => {
-    try {
-        const token = req.headers.authentication;
-        const { _id } = jwt.verify(token);
-        const { id } = req.params;
-
-        database.db('QuestionBoxDB').collection('tags').updateOne(
-            { _id: ObjectId(id), createrId: ObjectId(_id) },
-            { $set: { deleted: true } })
-            .then((result) => {
-                result.modifiedCount
-                    ? result.status(200).json(result)
-                    : result.status(401).json({ error: true, message: "Não foi possível deletar essa TAG" })
-            });
     } catch (e) {
         res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
     }

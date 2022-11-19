@@ -1,14 +1,14 @@
 import { Router } from 'express';
 import { ObjectId } from 'mongodb';
-import database from '../modules/db.mjs';
 import jwt from '../modules/jwt.mjs';
-import { createHmac, randomUUID } from "crypto";
 import vars from '../modules/vars.mjs';
+import database from '../modules/db.mjs';
+import { createHmac, randomUUID } from "crypto";
 
 const routes = Router();
 
 // Login
-routes.post('/login', async (req, res) => {
+routes.post('/signin', async (req, res) => {
     try {
         const { email, password } = req.body; // credentials
 
@@ -47,36 +47,8 @@ routes.post('/login', async (req, res) => {
     }
 });
 
-// Detalhes do usuário
-routes.get('/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        database.db('QuestionBoxDB').collection('users').findOne({ _id: ObjectId(id) }, (err, result) => {
-            if (err || !result) return res.status(404).json({ error: true, message: "Usuário não encontrado" });
-            res.status(200).json(result);
-            database.close();
-        });
-    } catch (e) {
-        res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
-    }
-});
-
-// Listar usuários
-routes.get('/', async (req, res) => {
-    try {
-        database.db('QuestionBoxDB').collection('users').find({ disabled: false })
-            .toArray((err, result) => {
-                if (err || !result) return res.status(501).json({ error: true, message: "Usuário não encontrado" });
-                res.status(200).json(result);
-                database.close();
-            });
-    } catch (e) {
-        res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
-    }
-});
-
 // Cadastrar usuário
-routes.post('/', async (req, res) => {
+routes.post('/signup', async (req, res) => {
     const hash = createHmac("sha256", vars.hash_secret).update(req.body.password?.toString()).digest("hex");
     try {
         const user = {
@@ -100,6 +72,20 @@ routes.post('/', async (req, res) => {
             };
             const token = jwt.create(userJWT); // Criar JWT
             res.status(201).json({ user, jwt: token });
+            database.close();
+        });
+    } catch (e) {
+        res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
+    }
+});
+
+// Detalhes do usuário
+routes.get('/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        database.db('QuestionBoxDB').collection('users').findOne({ _id: ObjectId(id) }, (err, result) => {
+            if (err || !result) return res.status(404).json({ error: true, message: "Usuário não encontrado" });
+            res.status(200).json(result);
             database.close();
         });
     } catch (e) {
