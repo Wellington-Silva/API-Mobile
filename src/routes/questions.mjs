@@ -178,7 +178,7 @@ routes.put('/answer/:questionId/:answerId', async (req, res) => {
                     : res.status(503).json({ error: true, message: "A pergunta que você tentou responder não foi encontrada" })
             });
     } catch (e) {
-
+        res.status(e?.status || 500).json({ error: true, message: "Houve um erro interno " + (e?.message || "") });
     }
 });
 
