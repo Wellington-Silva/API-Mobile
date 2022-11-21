@@ -72,7 +72,6 @@ routes.post('/signup', async (req, res) => {
             };
             const token = jwt.create(userJWT); // Criar JWT
             res.status(201).json({ user, jwt: token });
-            database.close();
         });
     } catch (e) {
         res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
@@ -86,7 +85,6 @@ routes.get('/:id', async (req, res) => {
         database.db('QuestionBoxDB').collection('users').findOne({ _id: ObjectId(id) }, (err, result) => {
             if (err || !result) return res.status(404).json({ error: true, message: "Usuário não encontrado" });
             res.status(200).json(result);
-            database.close();
         });
     } catch (e) {
         res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
