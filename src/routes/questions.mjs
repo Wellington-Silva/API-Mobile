@@ -89,7 +89,7 @@ routes.post('/', async (req, res) => {
             updateAt: new Date()
         };
         database.db("QuestionBoxDB").collection("questions").insertOne(content, (err, result) => {
-            if (err) throw { error: true, message: "Não foi possível realizar a pergunta" };
+            if (err) return res.status(401).json({ error: true, message: "Não foi possível realizar a pergunta" });
             res.status(200).json(result);
         });
     } catch (e) {
@@ -160,6 +160,30 @@ routes.post('/answer/:idAnswer', async (req, res) => {
 
 //  Editar uma resposta
 routes.put('/answer/:questionId/:answerId', async (req, res) => {
+    const token = req.headers.authentication;
+    const { _id } = jwt.verify(token);
+    const { questionId, answerId } = req.params; // Identificador da Pergunta
+    const { text } = req?.body; // Texto para atualizar
+    try {
+        database
+            .db('QuestionBoxDB')
+            .collection('questions')
+            .updateOne(
+                { _id: ObjectId(questionId), responses: { $elemMatch: { userId: ObjectId(_id), _id: ObjectId(answerId) } } },
+                { $set: { "responses.$.text": text.toString(), "responses.$.updatedAt": new Date() } }
+            )
+            .then((resultResponse) => {
+                resultResponse.modifiedCount
+                    ? res.status(200).json({ error: false, message: "A sua resposta foi editada" })
+                    : res.status(503).json({ error: true, message: "A pergunta que você tentou responder não foi encontrada" })
+            });
+    } catch (e) {
+        res.status(e?.status || 500).json({ error: true, message: "Houve um erro interno " + (e?.message || "") });
+    }
+});
+
+// Melhor Resposta
+routes.put('/bestanswer', async (req, res) => {
     const token = req.headers.authentication;
     const { _id } = jwt.verify(token);
     const { questionId, answerId } = req.params; // Identificador da Pergunta
