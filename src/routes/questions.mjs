@@ -12,7 +12,7 @@ routes.get('/questionbytag/:tagId', async (req, res) => {
     try {
         database.db('QuestionBoxDB').collection('questions').find({ tags: ObjectId(tagId) })
             .toArray((err, result) => {
-                if (err || !result) throw { error: true, message: "Nenhuma existe perguntas para essa TAG" };
+                if (err || !result) return res.status(404).json({ error: true, message: "Nenhuma existe perguntas para essa TAG" });
                 res.status(200).json(result);
             });
     } catch (e) {
@@ -43,7 +43,7 @@ routes.get('/:id', async (req, res) => {
     try {
         database.db("QuestionBoxDB").collection("questions").findOne({ _id: ObjectId(id) }, (err, result) => {
             console.log(result)
-            if (err) throw { status: 503, message: "Erro ao buscar questão(s)" };
+            if (err) return res.status(404).json({ status: 503, message: "Erro ao buscar questão" });
             res.status(200).json(result);
         });
     } catch (e) {
