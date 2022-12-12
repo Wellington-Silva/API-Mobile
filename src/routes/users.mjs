@@ -60,7 +60,7 @@ routes.post('/signup', async (req, res) => {
         };
 
         database.db("QuestionBoxDB").collection("users").insertOne(user, (err, result) => {
-            if (err) throw { error: true, message: "Não foi possível realizar a pergunta" };
+            if (err) return res.status(401).json({ error: true, message: "Não foi possível realizar a pergunta" });
             const userJWT = {
                 _id: ObjectId(result.insertedId),
                 firstName: req.body.firstName,
@@ -118,7 +118,7 @@ routes.delete('/:id', async (req, res) => {
             .then((result) => {
                 result.modifiedCount
                     ? res.status(200).json(result)
-                    : res.status(503).json({ error: true, message: "Não foi possível revogar usuário" })
+                    : res.status(403).json({ error: true, message: "Não foi possível revogar usuário" })
             })
     } catch (e) {
         res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });

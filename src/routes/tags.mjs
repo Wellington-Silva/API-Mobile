@@ -18,7 +18,7 @@ routes.get('/:pagination', async (req, res) => {
             .limit(15)
             .skip(page > 0 ? page * 10 : 0)
             .toArray((err, result) => {
-                if (err || !result) throw { error: true, message: "Nenhuma tag foi encontrada" };
+                if (err || !result) return res.status(404).json({ error: true, message: "Nenhuma tag foi encontrada" });
                 res.status(200).json(result);
             });
     } catch (e) {
@@ -59,7 +59,7 @@ routes.post('/', async (req, res) => {
         };
 
         database.db('QuestionBoxDB').collection('tags').insertOne(data, (err, result) => {
-            if (err || !result) res.status(401).json({ error: true, message: "Não foi possível inserir essa TAG" });
+            if (err || !result) return res.status(401).json({ error: true, message: "Não foi possível inserir essa TAG" });
             res.status(200).json(result);
         });
     } catch (e) {

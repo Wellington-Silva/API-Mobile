@@ -7,9 +7,9 @@ const routes = Router();
 
 // Listar perguntas por tag
 routes.get('/questionbytag/:tagId', async (req, res) => {
+    const { tagId } = req.params;
+    console.log(tagId);
     try {
-        const { tagId } = req.params;
-        console.log(tagId);
         database.db('QuestionBoxDB').collection('questions').find({ tags: ObjectId(tagId) })
             .toArray((err, result) => {
                 if (err || !result) throw { error: true, message: "Nenhuma existe perguntas para essa TAG" };
@@ -39,8 +39,8 @@ routes.get('/user/:userId', async (req, res) => {
 
 // Buscar uma pergunta específica
 routes.get('/:id', async (req, res) => {
+    const { id } = req.params
     try {
-        const { id } = req.params
         database.db("QuestionBoxDB").collection("questions").findOne({ _id: ObjectId(id) }, (err, result) => {
             console.log(result)
             if (err) throw { status: 503, message: "Erro ao buscar questão(s)" };
