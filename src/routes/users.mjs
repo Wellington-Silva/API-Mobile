@@ -17,7 +17,7 @@ routes.post('/signin', async (req, res) => {
             const hasPassword = new Boolean(result?.password);
             if (!hasPassword) {
                 const tempPassword = result._id.slice(-8);
-                if (password === tempPassword) return res.status(200).json({ message: "Você precisa criar uma nova senha", nextStep: "create_first_password" });
+                if (password === tempPassword) return res.json({ message: "Você precisa criar uma nova senha", nextStep: "create_first_password" }).status(200);
                 return res.status(200).json({ error: true, message: "Verifique suas credenciais" });
             }
             else {
@@ -60,11 +60,10 @@ routes.post('/signup', async (req, res) => {
         };
 
         database.db("QuestionBoxDB").collection("users").insertOne(user, (err, result) => {
-            if (err) return res.status(401).json({ error: true, message: "Não foi possível realizar a pergunta" });
+            if (err) return res.status(401).json({ error: true, message: "Não foi possível fazer o cadastro!" });
             const userJWT = {
                 _id: ObjectId(result.insertedId),
-                firstName: req.body.firstName,
-                surname: req.body.surname,
+                name: req.body.firstName,
                 email: req.body.email,
                 cpf: req.body.cpf,
                 type: req.body.type,
@@ -87,6 +86,7 @@ routes.get('/:id', async (req, res) => {
             res.status(200).json(result);
         });
     } catch (e) {
+        console.log("Aqui");
         res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
     }
 });

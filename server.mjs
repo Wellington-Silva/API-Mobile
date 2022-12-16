@@ -10,9 +10,9 @@ try {
     app.use(express.json({ limit: '50mb' }));
 
     //  Rotas
-    app.use(`/br/questions`, questions);
-    app.use(`/br/users`, users);
-    app.use(`/br/tags`, tags);
+    app.use(`/${version}/br/questions`, questions);
+    app.use(`/${version}/br/users`, users);
+    app.use(`/${version}/br/tags`, tags);
 
     app.listen(vars.port, () => 
         console.log("Server started", `Running server on ${vars.port}`)

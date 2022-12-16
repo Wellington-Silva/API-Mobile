@@ -8,5 +8,6 @@ export default {
     db_credentials: env.DB_CREDENCIALS,
     secretJwt: env.SECRETJWT,
     expiresIn: env.EXPIRATION,
-    hash_secret: env.HASH_SECRET
+    hash_secret: env.HASH_SECRET,
+    version: env.VERSION,
 }
