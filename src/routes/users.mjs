@@ -7,7 +7,7 @@ import { createHmac, randomUUID } from "crypto";
 
 const routes = Router();
 
-// Login
+// Login OK
 routes.post('/signin', async (req, res) => {
     try {
         const { email, password } = req.body; // credentials
@@ -17,7 +17,7 @@ routes.post('/signin', async (req, res) => {
             const hasPassword = new Boolean(result?.password);
             if (!hasPassword) {
                 const tempPassword = result._id.slice(-8);
-                if (password === tempPassword) return res.json({ message: "Você precisa criar uma nova senha", nextStep: "create_first_password" }).status(200);
+                if (password === tempPassword) return res.status(200).json({ message: "Você precisa criar uma nova senha", nextStep: "create_first_password" });
                 return res.status(200).json({ error: true, message: "Verifique suas credenciais" });
             }
             else {
@@ -30,16 +30,14 @@ routes.post('/signin', async (req, res) => {
                     };
                     return res.status(200).json({
                         session: {
-                            firstName: result?.firstName,
-                            surname: result?.surname,
-                            email: result.email,
-                            accessLevel: 1,
+                            ...userJwt,
+                            name: result?.name,
+                            cpf: result?.cpf,
                             token: jwt.create(userJwt),
-                            ...userJwt
                         }
                     });
                 }
-                res.status(200).json({ error: true, message: "Senha incorreta! Tente novamente" });
+                res.status(400).json({ error: true, message: "Senha incorreta! Tente novamente" });
             }
         });
     } catch (e) {
@@ -47,7 +45,7 @@ routes.post('/signin', async (req, res) => {
     }
 });
 
-// Cadastrar usuário
+// Cadastrar usuário OK
 routes.post('/signup', async (req, res) => {
     const hash = createHmac("sha256", vars.hash_secret).update(req.body.password?.toString()).digest("hex");
     try {
