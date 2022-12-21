@@ -75,7 +75,7 @@ routes.post('/signup', async (req, res) => {
     }
 });
 
-// Detalhes do usuário
+// Detalhes do usuário OK
 routes.get('/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -89,19 +89,18 @@ routes.get('/:id', async (req, res) => {
     }
 });
 
-// Editar usuário
+// Editar usuário OK
 routes.put('/:id', async (req, res) => {
     try {
         const token = req.headers.authentication;
-        const { _id } = jwt.validate(token);
-
-        const { id } = req.params;
-        const { changes } = req.body;
-        database.db("QuestionBoxDB").collection("users").updateOne({ _id: ObjectId(id) }, { $set: { ...changes } })
+        const { _id } = jwt.verify(token); 
+        const { body } = req.body;
+        database.db("QuestionBoxDB").collection("users").updateOne({ _id: ObjectId(_id) }, { $set: { ...body } })
             .then((result) => {
+                console.log(result);
                 result.modifiedCount
                     ? res.status(200).json(result)
-                    : res.status(503).json({ error: true, message: "Não foi possível revogar usuário" })
+                    : res.status(503).json({ error: true, message: "Não foi possível atualizar usuário" })
             });
     } catch (e) {
         res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
