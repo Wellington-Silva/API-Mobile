@@ -26,12 +26,12 @@ routes.post('/signin', async (req, res) => {
                     const userJwt = {
                         _id: result._id,
                         email: result.email,
+                        name: result?.name,
                         accessLevel: 1,
                     };
                     return res.status(200).json({
                         session: {
                             ...userJwt,
-                            name: result?.name,
                             cpf: result?.cpf,
                             token: jwt.create(userJwt),
                         }
@@ -108,18 +108,18 @@ routes.put('/:id', async (req, res) => {
 });
 
 // Revogar usuário
-routes.delete('/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        database.db("QuestionBoxDB").collection("users").updateOne({ _id: ObjectId(id) }, { $set: { disabled: true } })
-            .then((result) => {
-                result.modifiedCount
-                    ? res.status(200).json(result)
-                    : res.status(403).json({ error: true, message: "Não foi possível revogar usuário" })
-            })
-    } catch (e) {
-        res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
-    }
-});
+// routes.delete('/:id', async (req, res) => {
+//     try {
+//         const { id } = req.params;
+//         database.db("QuestionBoxDB").collection("users").updateOne({ _id: ObjectId(id) }, { $set: { disabled: true } })
+//             .then((result) => {
+//                 result.modifiedCount
+//                     ? res.status(200).json(result)
+//                     : res.status(403).json({ error: true, message: "Não foi possível revogar usuário" })
+//             })
+//     } catch (e) {
+//         res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
+//     }
+// });
 
 export default routes;
