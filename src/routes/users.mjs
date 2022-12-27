@@ -97,7 +97,6 @@ routes.put('/:id', async (req, res) => {
         const { body } = req.body;
         database.db("QuestionBoxDB").collection("users").updateOne({ _id: ObjectId(_id) }, { $set: { ...body } })
             .then((result) => {
-                console.log(result);
                 result.modifiedCount
                     ? res.status(200).json(result)
                     : res.status(503).json({ error: true, message: "Não foi possível atualizar usuário" })
