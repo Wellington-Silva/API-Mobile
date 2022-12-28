@@ -47,7 +47,7 @@ routes.get('/:pagination', async (req, res) => {
             .db('QuestionBoxDB')
             .collection('questions')
             .find()
-            .sort({ _id: 1 })
+            .sort({ createdAt: -1 })
             .limit(5)
             .skip(page > 0 ? page * 5 : 0)
             .toArray((err, result) => {
