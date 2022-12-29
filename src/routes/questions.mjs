@@ -115,28 +115,27 @@ routes.post('/answer/:idAnswer', async (req, res) => {
 });
 
 // Melhor Resposta
-// routes.put('/bestanswer', async (req, res) => {
-//     const token = req.headers.authentication;
-//     const { _id } = jwt.verify(token);
-//     const { questionId, answerId } = req.params; // Identificador da Pergunta
-//     const { text } = req?.body; // Texto para atualizar
-//     try {
-//         database
-//             .db('QuestionBoxDB')
-//             .collection('questions')
-//             .updateOne(
-//                 { _id: ObjectId(questionId), responses: { $elemMatch: { userId: ObjectId(_id), _id: ObjectId(answerId) } } },
-//                 { $set: { "responses.$.text": text.toString(), "responses.$.updatedAt": new Date() } }
-//             )
-//             .then((resultResponse) => {
-//                 resultResponse.modifiedCount
-//                     ? res.status(200).json({ error: false, message: "A sua resposta foi editada" })
-//                     : res.status(503).json({ error: true, message: "A pergunta que você tentou responder não foi encontrada" })
-//             });
-//     } catch (e) {
-//         res.status(e?.status || 500).json({ error: true, message: "Houve um erro interno " + (e?.message || "") });
-//     }
-// });
+routes.put('/bestanswer/:questionID/:answerIndex', async (req, res) => {
+    const token = req.headers.authentication;
+    const { _id } = jwt.verify(token);
+    const { questionID, answerIndex } = req.params; // Identificador da Pergunta
+
+    try {
+        database
+            .db('QuestionBoxDB')
+            .collection('questions')
+            .updateOne(
+                { _id: ObjectId(questionID), "user._id": ObjectId(_id)},
+                { $set: {[`responses.${answerIndex}.bestAnswer`]: true, [`responses.${answerIndex}.updatedAt`]: new Date() } }
+            ).then((resultResponse) => {
+                resultResponse.modifiedCount
+                    ? res.status(200).json({ error: false, message: "A sua resposta foi editada" })
+                    : res.status(503).json({ error: true, message: "A pergunta que você tentou responder não foi encontrada" })
+            });
+    } catch (e) {
+        res.status(e?.status || 500).json({ error: true, message: "Houve um erro interno " + (e?.message || "") });
+    }
+});
 
 //  Reagir a uma pergunta
 // routes.put('/like/:questionId', async (req, res) => {
