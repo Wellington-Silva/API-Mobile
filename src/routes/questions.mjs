@@ -85,32 +85,34 @@ routes.post('/', async (req, res) => {
 });
 
 // Responder uma pergunta - Criar Resposta
-// routes.post('/answer/:idAnswer', async (req, res) => {
-//     const token = req.headers.authentication;
-//     const { _id } = jwt.verify(token);
-//     const { idAnswer } = req.params; // Identificador da Pergunta
-//     const data = {
-//         _id: new ObjectId(),
-//         userId: ObjectId(_id),
-//         text: req?.body?.text?.toString(),
-//         bestAnswer: false,
-//         createdAt: new Date(),
-//         updatedAt: new Date()
-//     };
-//     try {
-//         database
-//             .db('QuestionBoxDB')
-//             .collection('questions')
-//             .updateOne({ _id: ObjectId(idAnswer) }, { $push: { responses: data } })
-//             .then((resultResponse) => {
-//                 resultResponse.modifiedCount
-//                     ? res.status(200).json({ error: false, message: "Resposta adicionada a pergunta" })
-//                     : res.status(503).json({ error: true, message: "A pergunta para resposta não foi encontrada" })
-//             });
-//     } catch (e) {
-//         res.status(e?.status || 500).json({ error: true, message: "Houve um erro interno " + (e?.message || "") });
-//     }
-// });
+routes.post('/answer/:idAnswer', async (req, res) => {
+    const token = req.headers.authentication;
+    const { _id, name } = jwt.verify(token);
+    const { idAnswer } = req.params; // Identificador da Pergunta
+    const body = req.body;
+
+    const data = {
+        bestAnswer: false,
+        answer: body?.answer,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        user: { _id: _id, name: name },
+    };
+
+    try {
+        database
+            .db('QuestionBoxDB')
+            .collection('questions')
+            .updateOne({ _id: ObjectId(idAnswer) }, { $push: { responses: data } })
+            .then((resultResponse) => {
+                resultResponse.modifiedCount
+                    ? res.status(200).json({ error: false, message: "Resposta adicionada a pergunta", data: data })
+                    : res.status(503).json({ error: true, message: "A pergunta para resposta não foi encontrada" })
+            });
+    } catch (e) {
+        res.status(e?.status || 500).json({ error: true, message: "Houve um erro interno " + (e?.message || "") });
+    }
+});
 
 // Melhor Resposta
 // routes.put('/bestanswer', async (req, res) => {
