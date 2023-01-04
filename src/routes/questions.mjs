@@ -125,8 +125,8 @@ routes.put('/bestanswer/:questionID/:answerIndex', async (req, res) => {
             .db('QuestionBoxDB')
             .collection('questions')
             .updateOne(
-                { _id: ObjectId(questionID), "user._id": ObjectId(_id)},
-                { $set: {[`responses.${answerIndex}.bestAnswer`]: true, [`responses.${answerIndex}.updatedAt`]: new Date() } }
+                { _id: ObjectId(questionID), "user._id": ObjectId(_id) },
+                { $set: { [`responses.${answerIndex}.bestAnswer`]: true, [`responses.${answerIndex}.updatedAt`]: new Date() } }
             ).then((resultResponse) => {
                 resultResponse.modifiedCount
                     ? res.status(200).json({ error: false, message: "A sua resposta foi editada" })
@@ -189,7 +189,7 @@ routes.put('/bestanswer/:questionID/:answerIndex', async (req, res) => {
 //     }
 // });
 
-// Buscar uma pergunta específica
+// Mostrar uma pergunta específica
 // routes.get('/:id', async (req, res) => {
 //     const { id } = req.params
 //     try {
@@ -202,5 +202,26 @@ routes.put('/bestanswer/:questionID/:answerIndex', async (req, res) => {
 //         res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
 //     }
 // });
+
+// Pesquisar pergunta
+routes.get('/searchquestion', async (req, res) => {
+    const { search } = req.query;
+    console.log(search)
+    try {
+        database.db('QuestionBoxDB')
+            .collection('questions')
+            .find({
+                title: { $regex: search.toString(), $options: 'i' },
+                description: { $regex: search.toString(), $options: 'i' }
+            })
+            .limit(10)
+            .toArray((err, result) => {
+                if (err || !result) return res.status(404).json({ error: true, message: "Nenhuma pergunta encontrada" });
+                res.status(200).json(result);
+            });
+    } catch (e) {
+
+    }
+})
 
 export default routes;
