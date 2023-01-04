@@ -13,12 +13,13 @@ routes.get('/:pagination', async (req, res) => {
         database
             .db("QuestionBoxDB")
             .collection("tags")
-            .find({ deleted: false })
+            .find()
             .sort({ _id: 1 })
-            .limit(15)
-            .skip(page > 0 ? page * 10 : 0)
+            .limit(5)
+            .skip(page > 0 ? page * 5 : 0)
             .toArray((err, result) => {
-                if (err || !result) return res.status(404).json({ error: true, message: "Nenhuma tag foi encontrada" });
+                if (err || !result) 
+                    return res.status(404).json({ error: true, message: "Nenhuma tag foi encontrada" });
                 res.status(200).json(result);
             });
     } catch (e) {
@@ -27,37 +28,37 @@ routes.get('/:pagination', async (req, res) => {
 });
 
 //  Listar as tags populares (As 8 primeiras tags mais usadas)
-routes.get('/popular', async (req, res) => { // Ver como fazer essas mais populares
-    try {
-        database
-            .db('QuestionBoxDB')
-            .collection('tags')
-            .find()
-            .limit(8)
-            .toArray((err, result) => {
-                if (err || !result) return res.status(404).json({ error: true, message: "Nenhuma TAG encontrada" });
-                res.status(200).json(result);
-            });
-    } catch (e) {
-        res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
-    }
-});
+// routes.get('/popular', async (req, res) => { // Ver como fazer essas mais populares
+//     try {
+//         database
+//             .db('QuestionBoxDB')
+//             .collection('tags')
+//             .find()
+//             .limit(8)
+//             .toArray((err, result) => {
+//                 if (err || !result) return res.status(404).json({ error: true, message: "Nenhuma TAG encontrada" });
+//                 res.status(200).json(result);
+//             });
+//     } catch (e) {
+//         res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
+//     }
+// });
 
 // Cadastrar uma TAG
 routes.post('/', async (req, res) => {
-    const token = req.headers.authentication;
-    const { _id } = jwt.verify(token);
-    const { name, description } = req.body;
-    try {
-        const data = {
-            userId: ObjectId(_id),
-            name: name.toString(),
-            description: description.toString() || '',
-            deleted: false,
-            createdAt: new Date(),
-            updatedAT: new Date()
-        };
+    const authHeader = req.headers.authentication;
+    const { _id } = jwt.verify(authHeader);
+    const { title, description } = req.body;
 
+    const data = {
+        title: title,
+        userId: ObjectId(_id),
+        description: description,
+        createdAt: new Date(),
+        updatedAT: new Date(),
+    };
+
+    try {
         database.db('QuestionBoxDB').collection('tags').insertOne(data, (err, result) => {
             if (err || !result) return res.status(401).json({ error: true, message: "Não foi possível inserir essa TAG" });
             res.status(200).json(result);
