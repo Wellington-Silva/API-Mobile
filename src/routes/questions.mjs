@@ -85,6 +85,33 @@ routes.post('/', async (req, res) => {
     }
 });
 
+// Editar uma pergunta
+routes.put('/:questionID', async (req, res) => {
+    const authHeader = req.headers.authentication;
+    const { _id } = jwt.verify(authHeader);
+    const { questionID } = req.params;
+    const question = req.body;
+
+    const content = {
+        tags: question.tags,
+        title: question.title,
+        description: question.description,
+        updateAt: new Date()
+    };
+
+    console.warn("AQUI " + questionID);
+    return;
+
+    try {
+        // database.db("QuestionBoxDB").collection("questions").insertOne(content, (err, result) => {
+        //     if (err) return res.status(401).json({ error: true, message: "Não foi possível realizar a pergunta" });
+        //     res.status(200).json(result);
+        // });
+    } catch (e) {
+        res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
+    }
+});
+
 // Responder uma pergunta - Criar Resposta
 routes.post('/answer/:idAnswer', async (req, res) => {
     const token = req.headers.authentication;
@@ -121,14 +148,14 @@ routes.put('/bestanswer/:questionID/:answerIndex', async (req, res) => {
     const { _id } = jwt.verify(token);
     const { currentState } = req.body;
     const { questionID, answerIndex } = req.params; // Identificador da Pergunta
-    
+
     try {
         database
             .db('QuestionBoxDB')
             .collection('questions')
             .updateOne(
-                { _id: ObjectId(questionID), "user._id": ObjectId(_id)},
-                { $set: {[`responses.${answerIndex}.bestAnswer`]: !currentState, [`responses.${answerIndex}.updatedAt`]: new Date() } }
+                { _id: ObjectId(questionID), "user._id": ObjectId(_id) },
+                { $set: { [`responses.${answerIndex}.bestAnswer`]: !currentState, [`responses.${answerIndex}.updatedAt`]: new Date() } }
             ).then((resultResponse) => {
                 resultResponse.modifiedCount
                     ? res.status(200).json({ error: false, message: "A sua resposta foi editada" })
@@ -138,6 +165,30 @@ routes.put('/bestanswer/:questionID/:answerIndex', async (req, res) => {
         res.status(e?.status || 500).json({ error: true, message: "Houve um erro interno " + (e?.message || "") });
     }
 });
+
+//  Editar uma resposta
+// routes.put('/answer/:questionId/:answerId', async (req, res) => {
+//     const token = req.headers.authentication;
+//     const { _id } = jwt.verify(token);
+//     const { questionId, answerId } = req.params; // Identificador da Pergunta
+//     const { text } = req?.body; // Texto para atualizar
+//     try {
+//         database
+//             .db('QuestionBoxDB')
+//             .collection('questions')
+//             .updateOne(
+//                 { _id: ObjectId(questionId), responses: { $elemMatch: { userId: ObjectId(_id), _id: ObjectId(answerId) } } },
+//                 { $set: { "responses.$.text": text.toString(), "responses.$.updatedAt": new Date() } }
+//             )
+//             .then((resultResponse) => {
+//                 resultResponse.modifiedCount
+//                     ? res.status(200).json({ error: false, message: "A sua resposta foi editada" })
+//                     : res.status(503).json({ error: true, message: "A pergunta que você tentou responder não foi encontrada" })
+//             });
+//     } catch (e) {
+//         res.status(e?.status || 500).json({ error: true, message: "Houve um erro interno " + (e?.message || "") });
+//     }
+// });
 
 //  Reagir a uma pergunta
 // routes.put('/like/:questionId', async (req, res) => {
@@ -164,30 +215,6 @@ routes.put('/bestanswer/:questionID/:answerIndex', async (req, res) => {
 //         });
 //     } catch (e) {
 //         res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
-//     }
-// });
-
-//  Editar uma resposta
-// routes.put('/answer/:questionId/:answerId', async (req, res) => {
-//     const token = req.headers.authentication;
-//     const { _id } = jwt.verify(token);
-//     const { questionId, answerId } = req.params; // Identificador da Pergunta
-//     const { text } = req?.body; // Texto para atualizar
-//     try {
-//         database
-//             .db('QuestionBoxDB')
-//             .collection('questions')
-//             .updateOne(
-//                 { _id: ObjectId(questionId), responses: { $elemMatch: { userId: ObjectId(_id), _id: ObjectId(answerId) } } },
-//                 { $set: { "responses.$.text": text.toString(), "responses.$.updatedAt": new Date() } }
-//             )
-//             .then((resultResponse) => {
-//                 resultResponse.modifiedCount
-//                     ? res.status(200).json({ error: false, message: "A sua resposta foi editada" })
-//                     : res.status(503).json({ error: true, message: "A pergunta que você tentou responder não foi encontrada" })
-//             });
-//     } catch (e) {
-//         res.status(e?.status || 500).json({ error: true, message: "Houve um erro interno " + (e?.message || "") });
 //     }
 // });
 
