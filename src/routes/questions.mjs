@@ -113,6 +113,21 @@ routes.put('/:questionID', async (req, res) => {
     }
 });
 
+// Deletar uma pergunta
+routes.delete('/delete/:questionID', async (req, res) => {
+    const { questionID } = req.params;
+    try {
+        database.db('QuestionBoxDB').collection('questions').deleteOne({ _id: ObjectId(questionID) })
+            .then((result) => {
+                result.acknowledged
+                    ? res.status(200).json(result)
+                    : res.status(403).json({ error: true, message: "Não foi possível realizar a edição" })
+            });
+    } catch (e) {
+        res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
+    }
+})
+
 // Responder uma pergunta - Criar Resposta
 routes.post('/answer/:idAnswer', async (req, res) => {
     const token = req.headers.authentication;
