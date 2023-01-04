@@ -67,6 +67,7 @@ routes.post('/', async (req, res) => {
 
     try {
         const content = {
+            // resolved: false,
             tags: question.tags,
             title: question.title,
             description: question.description,
@@ -118,6 +119,7 @@ routes.post('/answer/:idAnswer', async (req, res) => {
 routes.put('/bestanswer/:questionID/:answerIndex', async (req, res) => {
     const token = req.headers.authentication;
     const { _id } = jwt.verify(token);
+    const { currentState } = req.body;
     const { questionID, answerIndex } = req.params; // Identificador da Pergunta
 
     try {
@@ -126,7 +128,7 @@ routes.put('/bestanswer/:questionID/:answerIndex', async (req, res) => {
             .collection('questions')
             .updateOne(
                 { _id: ObjectId(questionID), "user._id": ObjectId(_id) },
-                { $set: { [`responses.${answerIndex}.bestAnswer`]: true, [`responses.${answerIndex}.updatedAt`]: new Date() } }
+                { $set: { [`responses.${answerIndex}.bestAnswer`]: !currentState, [`responses.${answerIndex}.updatedAt`]: new Date() } }
             ).then((resultResponse) => {
                 resultResponse.modifiedCount
                     ? res.status(200).json({ error: false, message: "A sua resposta foi editada" })
