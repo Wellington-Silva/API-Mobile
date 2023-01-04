@@ -100,13 +100,14 @@ routes.put('/:questionID', async (req, res) => {
     };
 
     console.warn("AQUI " + questionID);
-    return;
 
     try {
-        // database.db("QuestionBoxDB").collection("questions").insertOne(content, (err, result) => {
-        //     if (err) return res.status(401).json({ error: true, message: "Não foi possível realizar a pergunta" });
-        //     res.status(200).json(result);
-        // });
+        database.db('QuestionBoxDB').collection('questions').updateOne({ _id: ObjectId(questionID) }, { $set: { ...content } })
+            .then((result) => {
+                result.modifiedCount
+                    ? res.status(200).json(result)
+                    : res.status(403).json({ error: true, message: "Não foi possível realizar a edição" })
+            });
     } catch (e) {
         res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
     }
@@ -255,26 +256,5 @@ routes.put('/bestanswer/:questionID/:answerIndex', async (req, res) => {
 //         res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
 //     }
 // });
-
-// Pesquisar pergunta
-routes.get('/searchquestion', async (req, res) => {
-    const { search } = req.query;
-    console.log(search)
-    try {
-        database.db('QuestionBoxDB')
-            .collection('questions')
-            .find({
-                title: { $regex: search.toString(), $options: 'i' },
-                description: { $regex: search.toString(), $options: 'i' }
-            })
-            .limit(10)
-            .toArray((err, result) => {
-                if (err || !result) return res.status(404).json({ error: true, message: "Nenhuma pergunta encontrada" });
-                res.status(200).json(result);
-            });
-    } catch (e) {
-
-    }
-})
 
 export default routes;
