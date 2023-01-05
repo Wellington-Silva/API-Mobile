@@ -18,7 +18,7 @@ routes.get('/:pagination', async (req, res) => {
             .limit(5)
             .skip(page > 0 ? page * 5 : 0)
             .toArray((err, result) => {
-                if (err || !result) 
+                if (err || !result)
                     return res.status(404).json({ error: true, message: "Nenhuma tag foi encontrada" });
                 res.status(200).json(result);
             });
@@ -27,22 +27,22 @@ routes.get('/:pagination', async (req, res) => {
     }
 });
 
-//  Listar as tags populares (As 8 primeiras tags mais usadas)
-// routes.get('/popular', async (req, res) => { // Ver como fazer essas mais populares
-//     try {
-//         database
-//             .db('QuestionBoxDB')
-//             .collection('tags')
-//             .find()
-//             .limit(8)
-//             .toArray((err, result) => {
-//                 if (err || !result) return res.status(404).json({ error: true, message: "Nenhuma TAG encontrada" });
-//                 res.status(200).json(result);
-//             });
-//     } catch (e) {
-//         res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
-//     }
-// });
+//  Listar as tags populares (As 8 primeiras tags)
+routes.get('/firstsTags', async (req, res) => { // Ver como fazer essas mais populares
+    try {
+        database
+            .db('QuestionBoxDB')
+            .collection('tags')
+            .find()
+            .limit(8)
+            .toArray((err, result) => {
+                if (err || !result) return res.status(404).json({ error: true, message: "Nenhuma TAG encontrada" });
+                res.status(200).json(result);
+            });
+    } catch (e) {
+        res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
+    }
+});
 
 // Cadastrar uma TAG
 routes.post('/', async (req, res) => {
