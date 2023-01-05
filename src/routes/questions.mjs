@@ -99,10 +99,8 @@ routes.put('/:questionID', async (req, res) => {
         updateAt: new Date()
     };
 
-    console.warn("AQUI " + questionID);
-
     try {
-        database.db('QuestionBoxDB').collection('questions').updateOne({ _id: ObjectId(questionID) }, { $set: { ...content } })
+        database.db('QuestionBoxDB').collection('questions').updateOne({ _id: ObjectId(questionID), "user._id": ObjectId(_id) }, { $set: { ...content } })
             .then((result) => {
                 result.modifiedCount
                     ? res.status(200).json(result)
