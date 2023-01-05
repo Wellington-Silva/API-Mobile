@@ -99,10 +99,8 @@ routes.put('/:questionID', async (req, res) => {
         updateAt: new Date()
     };
 
-    console.warn("AQUI " + questionID);
-
     try {
-        database.db('QuestionBoxDB').collection('questions').updateOne({ _id: ObjectId(questionID) }, { $set: { ...content } })
+        database.db('QuestionBoxDB').collection('questions').updateOne({ _id: ObjectId(questionID), "user._id": ObjectId(_id) }, { $set: { ...content } })
             .then((result) => {
                 result.modifiedCount
                     ? res.status(200).json(result)
@@ -114,17 +112,20 @@ routes.put('/:questionID', async (req, res) => {
 });
 
 // Deletar uma pergunta
-routes.delete('/delete/:questionID', async (req, res) => {
+routes.delete('/:questionID', async (req, res) => {
+    const authHeader = req.headers.authentication;
+    const { _id } = jwt.verify(authHeader);
     const { questionID } = req.params;
+
     try {
-        database.db('QuestionBoxDB').collection('questions').deleteOne({ _id: ObjectId(questionID) })
+        database.db('QuestionBoxDB').collection('questions').deleteOne({ _id: ObjectId(questionID), "user._id": ObjectId(_id) })
             .then((result) => {
                 result.acknowledged
                     ? res.status(200).json(result)
-                    : res.status(403).json({ error: true, message: "Não foi possível realizar a edição" })
+                    : res.status(403).json({ error: true, message: "Não foi possível realizar a remoção!" })
             });
     } catch (e) {
-        res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
+        res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor." });
     }
 })
 
@@ -259,17 +260,18 @@ routes.put('/bestanswer/:questionID/:answerIndex', async (req, res) => {
 // });
 
 // Mostrar uma pergunta específica
-// routes.get('/:id', async (req, res) => {
-//     const { id } = req.params
-//     try {
-//         database.db("QuestionBoxDB").collection("questions").findOne({ _id: ObjectId(id) }, (err, result) => {
-//             console.log(result)
-//             if (err) return res.status(404).json({ status: 503, message: "Erro ao buscar questão" });
-//             res.status(200).json(result);
-//         });
-//     } catch (e) {
-//         res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
-//     }
-// });
+routes.get('/buscar/:id', async (req, res) => {
+    const { id } = req.params
+    
+    try {
+        database.db("QuestionBoxDB").collection("questions").findOne({ _id: ObjectId(id) }, (err, result) => {
+            console.log(result)
+            if (err) return res.status(404).json({ status: 503, message: "Erro ao buscar questão" });
+            res.status(200).json(result);
+        });
+    } catch (e) {
+        res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
+    }
+});
 
 export default routes;
