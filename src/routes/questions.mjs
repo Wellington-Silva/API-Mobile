@@ -260,17 +260,18 @@ routes.put('/bestanswer/:questionID/:answerIndex', async (req, res) => {
 // });
 
 // Mostrar uma pergunta específica
-// routes.get('/:id', async (req, res) => {
-//     const { id } = req.params
-//     try {
-//         database.db("QuestionBoxDB").collection("questions").findOne({ _id: ObjectId(id) }, (err, result) => {
-//             console.log(result)
-//             if (err) return res.status(404).json({ status: 503, message: "Erro ao buscar questão" });
-//             res.status(200).json(result);
-//         });
-//     } catch (e) {
-//         res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
-//     }
-// });
+routes.get('/buscar/:id', async (req, res) => {
+    const { id } = req.params
+    
+    try {
+        database.db("QuestionBoxDB").collection("questions").findOne({ _id: ObjectId(id) }, (err, result) => {
+            console.log(result)
+            if (err) return res.status(404).json({ status: 503, message: "Erro ao buscar questão" });
+            res.status(200).json(result);
+        });
+    } catch (e) {
+        res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
+    }
+});
 
 export default routes;
