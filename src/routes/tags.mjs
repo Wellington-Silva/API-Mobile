@@ -28,7 +28,8 @@ routes.get('/:pagination', async (req, res) => {
 });
 
 //  Listar as tags populares (As 8 primeiras tags)
-routes.get('/firstsTags', async (req, res) => { // Ver como fazer essas mais populares
+routes.get('/', async (req, res) => { 
+    // return console.warn("CHAMOU");
     try {
         database
             .db('QuestionBoxDB')
