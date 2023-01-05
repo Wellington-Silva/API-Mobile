@@ -114,17 +114,20 @@ routes.put('/:questionID', async (req, res) => {
 });
 
 // Deletar uma pergunta
-routes.delete('/delete/:questionID', async (req, res) => {
+routes.delete('/:questionID', async (req, res) => {
+    const authHeader = req.headers.authentication;
+    const { _id } = jwt.verify(authHeader);
     const { questionID } = req.params;
+
     try {
-        database.db('QuestionBoxDB').collection('questions').deleteOne({ _id: ObjectId(questionID) })
+        database.db('QuestionBoxDB').collection('questions').deleteOne({ _id: ObjectId(questionID), "user._id": ObjectId(_id) })
             .then((result) => {
                 result.acknowledged
                     ? res.status(200).json(result)
-                    : res.status(403).json({ error: true, message: "Não foi possível realizar a edição" })
+                    : res.status(403).json({ error: true, message: "Não foi possível realizar a remoção!" })
             });
     } catch (e) {
-        res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
+        res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor." });
     }
 })
 
