@@ -8,7 +8,6 @@ const routes = Router();
 // Listar perguntas por tag
 // routes.get('/questionbytag/:tagId', async (req, res) => {
 //     const { tagId } = req.params;
-//     console.log(tagId);
 //     try {
 //         database.db('QuestionBoxDB').collection('questions').find({ tags: ObjectId(tagId) })
 //             .toArray((err, result) => {
@@ -39,7 +38,6 @@ routes.get('/user/:userId', async (req, res) => {
 
 //  Listar todas as questões (SCROLL INFINITO - PAGINATION)
 routes.get('/:pagination', async (req, res) => {
-    // console.warn("FOI");
     const { pagination } = req.params;
     const page = parseInt(pagination);
     try {
@@ -213,7 +211,6 @@ routes.get('/buscar/:id', async (req, res) => {
 
     try {
         database.db("QuestionBoxDB").collection("questions").findOne({ _id: ObjectId(id) }, (err, result) => {
-            console.log(result)
             if (err) return res.status(404).json({ status: 503, message: "Erro ao buscar questão" });
             res.status(200).json(result);
         });
