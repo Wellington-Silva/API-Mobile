@@ -34,6 +34,7 @@ routes.get('/user/:userId', async (req, res) => {
             .db('QuestionBoxDB')
             .collection('questions')
             .find({ "user._id": ObjectId(userId) })
+            .sort({ createdAt: -1 })
             .toArray((err, result) => {
                 if (err || !result) return res.status(404).json({ error: true, message: "Nenhuma pergunta foi encotrada" });
                 res.status(200).json(result);
