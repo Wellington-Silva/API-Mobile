@@ -15,8 +15,8 @@ routes.get('/:pagination', async (req, res) => {
             .collection("tags")
             .find()
             .sort({ _id: 1 })
-            .limit(5)
-            .skip(page > 0 ? page * 5 : 0)
+            .limit(15)
+            .skip(page > 0 ? page * 15 : 0)
             .toArray((err, result) => {
                 if (err || !result)
                     return res.status(404).json({ error: true, message: "Nenhuma tag foi encontrada" });
@@ -28,7 +28,7 @@ routes.get('/:pagination', async (req, res) => {
 });
 
 //  Listar as tags populares (As 8 primeiras tags)
-routes.get('/firstsTags', async (req, res) => { // Ver como fazer essas mais populares
+routes.get('/', async (req, res) => { 
     try {
         database
             .db('QuestionBoxDB')

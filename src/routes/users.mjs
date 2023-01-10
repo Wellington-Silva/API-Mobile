@@ -84,7 +84,6 @@ routes.get('/:id', async (req, res) => {
             res.status(200).json(result);
         });
     } catch (e) {
-        console.log("Aqui");
         res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
     }
 });

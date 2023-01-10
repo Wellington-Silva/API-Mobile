@@ -6,19 +6,25 @@ import database from '../modules/db.mjs';
 const routes = Router();
 
 // Listar perguntas por tag
-// routes.get('/questionbytag/:tagId', async (req, res) => {
-//     const { tagId } = req.params;
-//     console.log(tagId);
-//     try {
-//         database.db('QuestionBoxDB').collection('questions').find({ tags: ObjectId(tagId) })
-//             .toArray((err, result) => {
-//                 if (err || !result) return res.status(404).json({ error: true, message: "Nenhuma existe perguntas para essa TAG" });
-//                 res.status(200).json(result);
-//             });
-//     } catch (e) {
-//         res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
-//     }
-// });
+routes.get('/questionbytag/:tagId/:page', async (req, res) => {
+    const { tagId, page } = req.params;
+
+    try {
+        database
+            .db('QuestionBoxDB')
+            .collection('questions')
+            .find({ "tags._id": tagId })
+            .sort({ createdAt: -1 })
+            .limit(10)
+            .skip(page > 0 ? page * 10 : 0)
+            .toArray((err, result) => {
+                if (err || !result) return res.status(404).json({ error: true, message: "Nenhuma existe perguntas para essa TAG" });
+                res.status(200).json(result);
+            });
+    } catch (e) {
+        res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
+    }
+});
 
 //  Listar perguntas feitas por um usuário
 routes.get('/user/:userId', async (req, res) => {
@@ -28,6 +34,7 @@ routes.get('/user/:userId', async (req, res) => {
             .db('QuestionBoxDB')
             .collection('questions')
             .find({ "user._id": ObjectId(userId) })
+            .sort({ createdAt: -1 })
             .toArray((err, result) => {
                 if (err || !result) return res.status(404).json({ error: true, message: "Nenhuma pergunta foi encotrada" });
                 res.status(200).json(result);
@@ -39,7 +46,6 @@ routes.get('/user/:userId', async (req, res) => {
 
 //  Listar todas as questões (SCROLL INFINITO - PAGINATION)
 routes.get('/:pagination', async (req, res) => {
-    // console.warn("FOI");
     const { pagination } = req.params;
     const page = parseInt(pagination);
     try {
@@ -74,7 +80,7 @@ routes.post('/', async (req, res) => {
             user: { _id: ObjectId(_id), name: name },
             responses: [],
             createdAt: new Date(),
-            updateAt: new Date()
+            updateAt: new Date(),
         };
         database.db("QuestionBoxDB").collection("questions").insertOne(content, (err, result) => {
             if (err) return res.status(401).json({ error: true, message: "Não foi possível realizar a pergunta" });
@@ -233,7 +239,6 @@ routes.get('/buscar/:id', async (req, res) => {
     const { id } = req.params
     try {
         database.db("QuestionBoxDB").collection("questions").findOne({ _id: ObjectId(id) }, (err, result) => {
-            console.log(result)
             if (err) return res.status(404).json({ status: 503, message: "Erro ao buscar questão" });
             res.status(200).json(result);
         });
