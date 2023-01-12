@@ -143,6 +143,7 @@ routes.post('/answer/:idAnswer', async (req, res) => {
     const body = req.body;
 
     const data = {
+        _id: new ObjectId(),
         bestAnswer: false,
         answer: body?.answer,
         createdAt: new Date(),
@@ -214,16 +215,18 @@ routes.put('/answer/:questionId/:answerId', async (req, res) => {
 });
 
 // Apagar uma resposta
-routes.delete('/delete/:id/:indice', async (req, res) => {
+routes.delete('/delete/:id/:idResponse', async (req, res) => {
     const token = req.headers.authentication;
     const { _id } = jwt.verify(token);
-    const { id, indice } = req.params; // ID da pergunta
+    const { id, idResponse } = req.params; // ID da pergunta
     try {
         database
             .db('QuestionBoxDB')
             .collection('questions')
-            // .updateOne({ _id: ObjectId(_id) }, { $pull: { responses: [indice] } })
-            .deleteOne({ _id: ObjectId(id), responses: [indice] }) // Verificar se cria responses como array ou objeto (tem que ser array)
+            .updateOne(
+                { _id: ObjectId(questionId), responses: { $elemMatch: { userId: ObjectId(_id), _id: ObjectId(id) } } },
+                { $pull: { "responses.$._id": idResponse } }
+            )
             .then((result) => {
                 result.acknowledged
                     ? res.status(200).json(result)
