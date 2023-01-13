@@ -148,7 +148,7 @@ routes.post('/answer/:idAnswer', async (req, res) => {
         answer: body?.answer,
         createdAt: new Date(),
         updatedAt: new Date(),
-        user: { _id: _id, name: name },
+        user: { _id: ObjectId(_id), name: name },
     };
 
     try {
@@ -195,14 +195,15 @@ routes.put('/answer/:questionId/:answerId', async (req, res) => {
     const token = req.headers.authentication;
     const { _id } = jwt.verify(token);
     const { questionId, answerId } = req.params; // Identificador da Pergunta
-    const { text } = req?.body; // Texto para atualizar
+    const { answer } = req?.body; // Texto para atualizar
+
     try {
         database
             .db('QuestionBoxDB')
             .collection('questions')
             .updateOne(
-                { _id: ObjectId(questionId), responses: { $elemMatch: { userId: ObjectId(_id), _id: ObjectId(answerId) } } },
-                { $set: { "responses.$.text": text.toString(), "responses.$.updatedAt": new Date() } }
+                { _id: ObjectId(questionId), responses: { $elemMatch: { _id: ObjectId(answerId), "user._id": ObjectId(_id) } } },
+                { $set: { "responses.$.answer": answer.toString(), "responses.$.updatedAt": new Date() } }
             )
             .then((resultResponse) => {
                 resultResponse.modifiedCount
@@ -215,16 +216,17 @@ routes.put('/answer/:questionId/:answerId', async (req, res) => {
 });
 
 // Apagar uma resposta
-routes.delete('/delete/:id/:idResponse', async (req, res) => {
+routes.delete('/delete/:questionId/:idResponse', async (req, res) => {
     const token = req.headers.authentication;
     const { _id } = jwt.verify(token);
-    const { id, idResponse } = req.params; // ID da pergunta
+    const { questionId, idResponse } = req.params; // ID da pergunta
+
     try {
         database
             .db('QuestionBoxDB')
             .collection('questions')
             .updateOne(
-                { _id: ObjectId(questionId), responses: { $elemMatch: { userId: ObjectId(_id), _id: ObjectId(id) } } },
+                { _id: ObjectId(questionId), responses: { $elemMatch: { "user._id": ObjectId(_id), _id: ObjectId(questionId) } } },
                 { $pull: { "responses.$._id": idResponse } }
             )
             .then((result) => {
