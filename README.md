@@ -1,7 +1,8 @@
 # Sobre o App
 Neste repositório está o back-end do projeto da disciplina de Programação para Dispositivos Móveis.
-O nome do aplicativo é Questions Box, um fórum online onde alunos e professores interagem tirando e 
-respondendo dúvidas.
+O nome do aplicativo é Questions Box, este, é um fórum online onde alunos e professores do IFS interagem entre si,
+alguém seja professor ou aluno faz um pergunta e outros usuários respondem, sejam eles professores ou alunos também.
+Neste aplicativo é possível criar TAGs para encaixar o assunto das perguntas.
 
 **Tipos de usuário:**  
 1 - aluno  
@@ -68,13 +69,5 @@ GET: "/tags/list"
 
 // Cadastrar uma TAG
 POST: "/tags/"
-
-```
-
-- REACTS
-
-```js
-//
-PUT: "/reacts/like/:questionId"
 
 ```
