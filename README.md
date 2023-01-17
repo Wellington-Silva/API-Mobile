@@ -8,7 +8,7 @@ Neste aplicativo é possível criar TAGs para encaixar o assunto das perguntas.
 1 - aluno  
 2 - professor  
 
-# Listagem de Rotas
+# Listagem de Rotas e funcionalidades de cada uma delas
 
 - USERS
 
