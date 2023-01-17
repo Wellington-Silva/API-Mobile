@@ -226,8 +226,10 @@ routes.delete('/delete/:questionId/:idResponse', async (req, res) => {
             .db('QuestionBoxDB')
             .collection('questions')
             .updateOne(
-                { _id: ObjectId(questionId), responses: { $elemMatch: { "user._id": ObjectId(_id), _id: ObjectId(questionId) } } },
-                { $pull: { "responses.$._id": idResponse } }
+                { _id: ObjectId(questionId), responses: { 
+                    $elemMatch: { "user._id": ObjectId(_id), _id: ObjectId(idResponse) } 
+                }},
+                { $pull: { responses: { _id: ObjectId(idResponse) } } }
             )
             .then((result) => {
                 result.acknowledged

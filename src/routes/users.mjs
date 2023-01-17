@@ -92,13 +92,21 @@ routes.get('/:id', async (req, res) => {
 routes.put('/:id', async (req, res) => {
     try {
         const token = req.headers.authentication;
-        const { _id } = jwt.verify(token); 
+        const { _id } = jwt.verify(token);
         const { body } = req.body;
         database.db("QuestionBoxDB").collection("users").updateOne({ _id: ObjectId(_id) }, { $set: { ...body } })
             .then((result) => {
-                result.modifiedCount
-                    ? res.status(200).json(result)
-                    : res.status(503).json({ error: true, message: "Não foi possível atualizar usuário" })
+                if (result.modifiedCount) {
+                    const userJWT = {
+                        _id: ObjectId(_id),
+                        ...body
+                    };
+                    const token = jwt.create(userJWT);
+                    res.status(200).json({ token: token });
+                } else {
+                    return res.status(503).json({ error: true, message: "Não foi possível atualizar usuário" });
+                }
+
             });
     } catch (e) {
         res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
