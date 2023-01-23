@@ -7,45 +7,37 @@ import { createHmac, randomUUID } from "crypto";
 
 const routes = Router();
 
-// Login OK
+// Login
 routes.post('/signin', async (req, res) => {
     try {
         const { email, password } = req.body; // credentials
 
         database.db("QuestionBoxDB").collection("users").findOne({ email }, (err, result) => {
             if (err || !result) return res.status(400).json({ error: true, message: "Usuário não encontrado" });
-            const hasPassword = new Boolean(result?.password);
-            if (!hasPassword) {
-                const tempPassword = result._id.slice(-8);
-                if (password === tempPassword) return res.status(200).json({ message: "Você precisa criar uma nova senha", nextStep: "create_first_password" });
-                return res.status(200).json({ error: true, message: "Verifique suas credenciais" });
+            const hash = createHmac("sha256", vars.hash_secret).update(password?.toString()).digest("hex");
+            if (hash === result?.password) {
+                const userJwt = {
+                    _id: result._id,
+                    email: result.email,
+                    name: result?.name,
+                    accessLevel: 1,
+                };
+                return res.status(200).json({
+                    session: {
+                        ...userJwt,
+                        cpf: result?.cpf,
+                        token: jwt.create(userJwt),
+                    }
+                });
             }
-            else {
-                const hash = createHmac("sha256", vars.hash_secret).update(password?.toString()).digest("hex");
-                if (hash === result?.password) {
-                    const userJwt = {
-                        _id: result._id,
-                        email: result.email,
-                        name: result?.name,
-                        accessLevel: 1,
-                    };
-                    return res.status(200).json({
-                        session: {
-                            ...userJwt,
-                            cpf: result?.cpf,
-                            token: jwt.create(userJwt),
-                        }
-                    });
-                }
-                res.status(400).json({ error: true, message: "Senha incorreta! Tente novamente" });
-            }
+            res.status(400).json({ error: true, message: "Senha incorreta! Tente novamente" });
         });
     } catch (e) {
         res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
     }
 });
 
-// Cadastrar usuário OK
+// Cadastrar usuário
 routes.post('/signup', async (req, res) => {
     const hash = createHmac("sha256", vars.hash_secret).update(req.body.password?.toString()).digest("hex");
     try {
@@ -75,7 +67,7 @@ routes.post('/signup', async (req, res) => {
     }
 });
 
-// Detalhes do usuário OK
+// Detalhes do usuário
 routes.get('/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -88,7 +80,7 @@ routes.get('/:id', async (req, res) => {
     }
 });
 
-// Editar usuário OK
+// Editar usuário
 routes.put('/:id', async (req, res) => {
     try {
         const token = req.headers.authentication;
@@ -106,26 +98,10 @@ routes.put('/:id', async (req, res) => {
                 } else {
                     return res.status(503).json({ error: true, message: "Não foi possível atualizar usuário" });
                 }
-
             });
     } catch (e) {
         res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
     }
 });
-
-// Revogar usuário
-// routes.delete('/:id', async (req, res) => {
-//     try {
-//         const { id } = req.params;
-//         database.db("QuestionBoxDB").collection("users").updateOne({ _id: ObjectId(id) }, { $set: { disabled: true } })
-//             .then((result) => {
-//                 result.modifiedCount
-//                     ? res.status(200).json(result)
-//                     : res.status(403).json({ error: true, message: "Não foi possível revogar usuário" })
-//             })
-//     } catch (e) {
-//         res.status(e?.status || 500).json({ error: true, message: e?.message || "Houve um erro interno no servidor" });
-//     }
-// });
 
 export default routes;
